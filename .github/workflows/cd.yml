@@ -2,6 +2,7 @@ name: CD
 
 # Runs only after CI passes on main. Applies infrastructure, then uploads the documents.
 on:
+  workflow_dispatch:   # manual "Run workflow" button
   workflow_run:
     workflows: ["CI"]
     types: [completed]
@@ -17,7 +18,7 @@ env:
 
 jobs:
   deploy-infra:
-    if: github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: production   # a reviewer must approve in GitHub before this runs
     defaults:
@@ -26,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -47,7 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
