@@ -31,9 +31,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
-          cache-dependency-path: requirements.txt
-      - run: pip install -r ../requirements.txt   # the vector index script needs requests and boto3
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv pip install --system -r ../requirements-deploy.txt   # the vector index script
       - uses: hashicorp/setup-terraform@v3
       - uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -54,9 +55,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
-          cache-dependency-path: requirements.txt
-      - run: pip install -r requirements.txt
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv pip install --system -r requirements.txt
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}

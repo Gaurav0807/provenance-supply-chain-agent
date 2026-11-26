@@ -1,10 +1,6 @@
-pyarrow
 boto3
 rdflib
 pyyaml
-pytest
-ruff
 requests
-deepeval
-sagemaker
 langgraph
+pyarrow
