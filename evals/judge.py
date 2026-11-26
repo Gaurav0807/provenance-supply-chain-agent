@@ -10,10 +10,10 @@ from deepeval.metrics import GEval
 from deepeval.models import DeepEvalBaseLLM
 from deepeval.test_case import SingleTurnParams
 
-from agent.aws import session
+from agent.aws import bedrock_client
 
 JUDGE_MODEL_ID = os.environ.get("JUDGE_MODEL_ID", "us.anthropic.claude-haiku-4-5-20251001-v1:0")
-_bedrock = session().client("bedrock-runtime")
+_bedrock = bedrock_client()
 
 
 class BedrockJudge(DeepEvalBaseLLM):

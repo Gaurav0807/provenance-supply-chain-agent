@@ -7,6 +7,7 @@ Usage (from the project root, with AWS access):
 """
 import csv
 import json
+import logging
 import os
 import sys
 from collections import defaultdict
@@ -23,6 +24,10 @@ HERE = Path(__file__).parent
 DATASET = HERE / "golden_dataset.csv"
 RESULTS = HERE / "results.json"
 BASELINE = float(os.environ.get("EVAL_BASELINE", "0.7"))
+
+# Keep the log readable: only warnings from the AWS and judge libraries
+for name in ("botocore", "boto3", "urllib3", "deepeval"):
+    logging.getLogger(name).setLevel(logging.WARNING)
 DOCUMENT_CATEGORIES = ("document", "hybrid")
 
 
@@ -36,12 +41,16 @@ def main():
     passes = defaultdict(list)          # metric label -> [1 or 0, ...]
     by_category = defaultdict(list)     # category -> [1 or 0, ...] for correctness
 
-    for case in cases:
+    total = len(cases)
+    for number, case in enumerate(cases, start=1):
         if case["category"] in DOCUMENT_CATEGORIES and not has_kb:
             skipped += 1
             continue
 
-        out = ask(case["question"])
+        try:
+            out = ask(case["question"])
+        except Exception as e:  # noqa: BLE001 - a failed call is a failed case, not a crashed run
+            out = {"answer": f"ERROR: {e}", "trace": []}
         test_case = LLMTestCase(
             input=case["question"],
             actual_output=out["answer"],
@@ -69,7 +78,7 @@ def main():
         by_category[case["category"]].append(int(row["scores"]["correctness"]["passed"]))
         results.append(row)
         status = "PASS" if row["scores"]["correctness"]["passed"] else "FAIL"
-        print(f"{status}  [{case['category']}] {case['question']}")
+        print(f"[{number}/{total}] {status}  [{case['category']}] {case['question']}", flush=True)
 
     summary = {label: sum(v) / len(v) for label, v in passes.items() if v}
     category_rates = {cat: sum(v) / len(v) for cat, v in by_category.items() if v}

@@ -5,7 +5,7 @@ import os
 from rdflib import OWL, RDF, RDFS, Namespace
 
 from agent.athena import run_query
-from agent.aws import session
+from agent.aws import bedrock_client
 from agent.ontology_lookup import graph
 from agent.rag import search_documents
 from agent.sql_guard import UnsafeSQL, check
@@ -14,7 +14,7 @@ PROV = Namespace("http://provenance.example/ontology#")
 LLM_MODEL = os.environ.get("LLM_MODEL_ID", "us.anthropic.claude-sonnet-4-6")
 MAX_STEPS = 8
 
-_bedrock = session().client("bedrock-runtime")
+_bedrock = bedrock_client()
 
 
 def _name(node):
