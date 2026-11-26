@@ -98,11 +98,14 @@ def main():
     )
     print(f"Logged to SageMaker Experiments: {run_id}")
 
-    correctness = summary.get("correctness", 0.0)
-    if correctness < BASELINE:
-        print(f"FAILED: correctness {correctness:.0%} is below the baseline {BASELINE:.0%}")
+    failing = {label: rate for label, rate in summary.items() if rate < BASELINE}
+    if failing or not summary:
+        for label, rate in failing.items():
+            print(f"FAILED: {label} is {rate:.0%}, below the required {BASELINE:.0%}")
+        if not summary:
+            print("FAILED: no cases were scored")
         sys.exit(1)
-    print(f"PASSED: correctness {correctness:.0%} meets the baseline {BASELINE:.0%}")
+    print(f"PASSED: every metric meets the required {BASELINE:.0%}")
 
 
 if __name__ == "__main__":
