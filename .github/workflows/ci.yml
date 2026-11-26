@@ -45,6 +45,8 @@ jobs:
       - run: python -m evals.run_evals
         env:
           KNOWLEDGE_BASE_ID: ${{ vars.KNOWLEDGE_BASE_ID }}
+          LLM_MODEL_ID: ${{ vars.LLM_MODEL_ID }}
+          JUDGE_MODEL_ID: ${{ vars.JUDGE_MODEL_ID }}
           DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
           EVAL_BASELINE: "0.7"
       - uses: actions/upload-artifact@v4
