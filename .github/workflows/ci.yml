@@ -49,6 +49,9 @@ jobs:
           JUDGE_MODEL_ID: ${{ vars.JUDGE_MODEL_ID }}
           DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
           EVAL_BASELINE: "0.7"
+      - name: Eval summary
+        if: always()
+        run: python -m evals.summary >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
