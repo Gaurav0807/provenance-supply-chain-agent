@@ -13,3 +13,11 @@ output "collection_endpoint" {
 output "documents_queue_url" {
   value = aws_sqs_queue.documents.url
 }
+
+output "guardrail_id" {
+  value = aws_bedrock_guardrail.agent.guardrail_id
+}
+
+output "guardrail_version" {
+  value = aws_bedrock_guardrail_version.agent.version
+}

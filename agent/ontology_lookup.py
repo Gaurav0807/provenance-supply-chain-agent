@@ -56,6 +56,23 @@ def get_context(word):
     return results
 
 
+def sensitive_columns():
+    """Column name -> sensitivity tag, read from the ontology (e.g. unit_cost -> finance)."""
+    q = PREFIXES + """
+SELECT ?col ?tag WHERE {
+  ?prop prov:column ?col ;
+        prov:sensitivity ?tag .
+}
+"""
+    return {str(r.col).split(".")[-1]: str(r.tag) for r in graph.query(q)}
+
+
+def allowed_tables():
+    """Every table the ontology maps a concept to. Queries may only read these."""
+    q = PREFIXES + "SELECT ?table WHERE { ?concept prov:mappedTable ?table . }"
+    return {str(r.table).lower() for r in graph.query(q)}
+
+
 if __name__ == "__main__":
     print(len(graph), "facts loaded")
     for word in ["late", "out of stock", "at-risk supplier"]:

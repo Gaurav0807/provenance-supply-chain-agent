@@ -9,6 +9,8 @@ tools: runs the requested tool (run_sql or search_documents) and adds the result
 Print the diagram:  python -m agent.graph
 """
 import operator
+import os
+import re
 from typing import Annotated, TypedDict
 
 from langgraph.graph import END, START, StateGraph
@@ -22,6 +24,14 @@ from agent.agent import (
     dispatch,
     ontology_text,
 )
+from agent.ontology_lookup import sensitive_columns
+
+GUARDRAIL = (
+    {"guardrailIdentifier": os.environ["GUARDRAIL_ID"], "guardrailVersion": os.environ.get("GUARDRAIL_VERSION", "DRAFT")}
+    if os.environ.get("GUARDRAIL_ID")
+    else None
+)
+BLOCKED = "I can only answer questions about the Stride Footwear supply chain data."
 
 SYSTEM_PROMPT = [{"text": SYSTEM.format(ontology=ontology_text())}]  # built once, not per step
 
@@ -44,7 +54,10 @@ def agent_node(state):
         messages=state["messages"],
         toolConfig={"tools": TOOLS},
         inferenceConfig={"maxTokens": 1500, "temperature": 0},
+        **({"guardrailConfig": GUARDRAIL} if GUARDRAIL else {}),
     )
+    if resp["stopReason"] == "guardrail_intervened":
+        return {"steps": steps, "answer": BLOCKED}
     msg = resp["output"]["message"]
     update = {"steps": steps, "messages": [msg]}
     if resp["stopReason"] != "tool_use":
@@ -77,13 +90,35 @@ builder.add_edge("tools", "agent")
 graph = builder.compile()
 
 
+def sensitive_notice(trace):
+    """A notice to show above the answer when a tool query used a column tagged sensitive in the ontology."""
+    tags = sensitive_columns()
+    used = {}
+    for step in trace:
+        if step["tool"] != "run_sql":
+            continue
+        output = step["output"]
+        sql = str(output.get("sql", ""))
+        returned = set()
+        for row in output.get("rows", []):
+            returned.update(row.keys())  # catches SELECT * as well as named columns
+        for column, tag in tags.items():
+            named = re.search(rf"\b{re.escape(column)}\b", sql, re.IGNORECASE)
+            if named or column in returned:
+                used[column] = tag
+    if not used:
+        return ""
+    lines = [f"> **Sensitive ({tag}):** this answer uses `{column}`." for column, tag in sorted(used.items())]
+    return "\n".join(lines) + "\n\n"
+
+
 def ask(question):
     final = graph.invoke({
         "messages": [{"role": "user", "content": [{"text": question}]}],
         "trace": [],
         "steps": 0,
     })
-    return {"answer": final["answer"], "trace": final["trace"]}
+    return {"answer": sensitive_notice(final["trace"]) + final["answer"], "trace": final["trace"]}
 
 
 if __name__ == "__main__":
