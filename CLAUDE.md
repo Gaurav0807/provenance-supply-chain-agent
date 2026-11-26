@@ -1,0 +1,2 @@
+- Use as few tokens as possible.
+- Do only what I ask. Keep answers short.

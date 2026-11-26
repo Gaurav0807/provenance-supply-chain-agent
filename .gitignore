@@ -1,0 +1,41 @@
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.deepeval/
+
+# Secrets and local settings (never commit these)
+.env
+.env.*
+!.env.example
+
+# Terraform: state and local plugins (the lock file IS committed)
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+crash.log
+infra/*.zip
+
+# Lambda build output
+*.zip
+lambda/*/build/
+
+# Generated data and results (rebuilt by the pipeline)
+data/out/
+data/documents/
+data/*.duckdb
+*.duckdb
+evals/results.json
+
+# Personal and internal notes
+PLAN.md
+docs/interview_prep.md
+PROJECT_NOTES.md
+
+# macOS
+.DS_Store

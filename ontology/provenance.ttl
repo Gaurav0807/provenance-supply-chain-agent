@@ -1,0 +1,117 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . # RDF Schema namespace, for labels and comments:
+@prefix owl: <http://www.w3.org/2002/07/owl#> .  ## Class and relationship definitions
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . # XML Schema namespace, for data types
+@prefix prov: <http://provenance.example/ontology#> . # Our ontology
+
+
+<http://provenance.example/ontology> a owl:Ontology ;
+    rdfs:label "Stride Footwear supply chain ontology" ;
+    rdfs:comment "Fictional brand. Maps business concepts to Athena tables in the provenance database." .
+
+# ---------- Core concepts ----------
+
+prov:Factory a owl:Class ;
+    rdfs:label "Factory" ;
+    rdfs:comment "A contract manufacturer that makes our shoes." ;
+    prov:mappedTable "provenance.factories" ; #Athena table it maps to. This is our own property
+    prov:key "factory_id" .
+
+prov:Product a owl:Class ;
+    rdfs:label "Product" ;
+    rdfs:comment "A shoe model in one size and colour. Identified by SKU." ;
+    prov:mappedTable "provenance.products" ; #Athena table it maps to. This is our own property
+    prov:key "sku" .
+
+prov:Warehouse a owl:Class ;
+    rdfs:label "Warehouse" ;
+    rdfs:comment "A distribution centre that stores finished shoes." ;
+    prov:mappedTable "provenance.warehouses" ;
+    prov:key "warehouse_id" .
+
+prov:PurchaseOrder a owl:Class ;
+    rdfs:label "Purchase order" ;
+    rdfs:comment "An order placed with a factory for a quantity of one SKU." ;
+    prov:mappedTable "provenance.purchase_orders" ;
+    prov:key "po_id" .
+
+prov:Shipment a owl:Class ;
+    rdfs:label "Shipment" ;
+    rdfs:comment "The physical delivery of a purchase order." ;
+    prov:mappedTable "provenance.shipments" ;
+    prov:key "shipment_id" .
+
+prov:InventoryPosition a owl:Class ;
+    rdfs:label "Inventory position" ;
+    rdfs:comment "Stock of one SKU in one warehouse." ;
+    prov:mappedTable "provenance.inventory" ;
+    prov:key "warehouse_id, sku" .
+
+# ---------- Relationships (object properties) ----------
+
+prov:fulfilledBy a owl:ObjectProperty ;
+    rdfs:label "fulfilled by" ;
+    rdfs:domain prov:PurchaseOrder ;
+    rdfs:range prov:Factory ;
+    prov:joinOn "provenance.purchase_orders.factory_id = provenance.factories.factory_id" .
+
+prov:orders a owl:ObjectProperty ;
+    rdfs:label "orders" ;
+    rdfs:domain prov:PurchaseOrder ; #A purchase order orders a product.
+    rdfs:range prov:Product ;
+    prov:joinOn "provenance.purchase_orders.sku = provenance.products.sku" .
+
+prov:deliveredBy a owl:ObjectProperty ;
+    rdfs:label "delivered by" ;
+    rdfs:domain prov:Shipment ;
+    rdfs:range prov:PurchaseOrder ;
+    prov:joinOn "provenance.shipments.po_id = provenance.purchase_orders.po_id" .
+
+prov:stockedAt a owl:ObjectProperty ;
+    rdfs:label "stocked at" ;
+    rdfs:domain prov:InventoryPosition ;# Inventory position is stocked at a warehouse.
+    rdfs:range prov:Warehouse ;
+    prov:joinOn "provenance.inventory.warehouse_id = provenance.warehouses.warehouse_id" .
+
+prov:forProduct a owl:ObjectProperty ;
+    rdfs:label "for product" ;
+    rdfs:domain prov:InventoryPosition ;# Inventory position is for a product.
+    rdfs:range prov:Product ;
+    prov:joinOn "provenance.inventory.sku = provenance.products.sku" .
+
+# ---------- Agreed business definitions ----------
+# Each term is a concept, so the agent can look it up by label and get one meaning.
+
+prov:Delayed a owl:Class ;
+    rdfs:label "delayed" , "late" , "delayed shipment" ;
+    rdfs:comment "A shipment is delayed when it was delivered after the promised date of its purchase order." ;
+    prov:sqlCondition "provenance.shipments.delivered_date > provenance.purchase_orders.promised_date" ;
+    prov:appliesTo prov:Shipment .
+
+prov:Stockout a owl:Class ;
+    rdfs:label "stockout" , "out of stock" , "below reorder point" ;
+    rdfs:comment "An inventory position is a stockout when on-hand stock is below its reorder point." ;
+    prov:sqlCondition "provenance.inventory.on_hand < provenance.inventory.reorder_point" ;
+    prov:appliesTo prov:InventoryPosition . #Rule work on Inventory rows
+
+prov:AtRiskFactory a owl:Class ;
+    rdfs:label "at-risk factory" , "risky supplier" , "at-risk supplier" ;
+    rdfs:comment "A factory is at risk when at least 3 of its purchase orders were delayed." ;
+    prov:minLateShipments "3"^^xsd:integer ;
+    prov:appliesTo prov:Factory .
+
+# ---------- Governance ----------
+
+prov:unitCost a rdf:Property ;
+    rdfs:label "unit cost" ;
+    rdfs:comment "What we pay the factory per pair. Finance-sensitive." ;
+    prov:appliesTo prov:Product ;
+    prov:column "provenance.products.unit_cost" ;
+    prov:sensitivity "finance" .
+
+prov:penaltyPct a rdf:Property ;
+    rdfs:label "penalty percentage" ;
+    rdfs:comment "Contract penalty per late week. Procurement-sensitive." ;
+    prov:appliesTo prov:Factory ;
+    prov:column "provenance.factories.penalty_pct_per_late_week" ;
+    prov:sensitivity "procurement" .

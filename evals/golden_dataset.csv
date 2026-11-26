@@ -1,0 +1,40 @@
+id,category,question,expected_answer
+G001,structured,How many late orders has Saigon Stitch Co delivered?,Saigon Stitch Co (F001) has 2 late orders.
+G002,structured,How many late orders has Hanoi Sole Works delivered?,Hanoi Sole Works (F002) has 3 late orders.
+G003,structured,How many late orders has Java Lace Mfg delivered?,Java Lace Mfg (F003) has 3 late orders.
+G004,structured,How many late orders has Surabaya Foam Ltd delivered?,Surabaya Foam Ltd (F004) has 5 late orders.
+G005,structured,How many late orders has Guangzhou Heel Co delivered?,Guangzhou Heel Co (F005) has 2 late orders.
+G006,structured,How many late orders has Dongguan Mesh Factory delivered?,Dongguan Mesh Factory (F006) has 0 late orders.
+G007,structured,How many late orders has Shenzhen Rubber Ltd delivered?,Shenzhen Rubber Ltd (F007) has 1 late orders.
+G008,structured,How many late orders has Chennai Knit Works delivered?,Chennai Knit Works (F008) has 2 late orders.
+G009,structured,How many late orders has Pune Upper Mills delivered?,Pune Upper Mills (F009) has 5 late orders.
+G010,structured,How many late orders has Ho Chi Minh Insole delivered?,Ho Chi Minh Insole (F010) has 3 late orders.
+G011,structured,How many late orders has Bekasi Cushion Co delivered?,Bekasi Cushion Co (F011) has 18 late orders.
+G012,structured,How many late orders has Ningbo Eyelet Ltd delivered?,Ningbo Eyelet Ltd (F012) has 1 late orders.
+G013,document,What late delivery penalty does Saigon Stitch Co have?,Saigon Stitch Co has no late delivery penalty clause.
+G014,document,What late delivery penalty does Hanoi Sole Works have?,Hanoi Sole Works has no late delivery penalty clause.
+G015,document,What late delivery penalty does Java Lace Mfg have?,Java Lace Mfg has no late delivery penalty clause.
+G016,document,What late delivery penalty does Surabaya Foam Ltd have?,Surabaya Foam Ltd charges 2.0% of purchase order value for each full week late.
+G017,document,What late delivery penalty does Guangzhou Heel Co have?,Guangzhou Heel Co has no late delivery penalty clause.
+G018,document,What late delivery penalty does Dongguan Mesh Factory have?,Dongguan Mesh Factory has no late delivery penalty clause.
+G019,document,What late delivery penalty does Shenzhen Rubber Ltd have?,Shenzhen Rubber Ltd has no late delivery penalty clause.
+G020,document,What late delivery penalty does Chennai Knit Works have?,Chennai Knit Works has no late delivery penalty clause.
+G021,document,What late delivery penalty does Pune Upper Mills have?,Pune Upper Mills has no late delivery penalty clause.
+G022,document,What late delivery penalty does Ho Chi Minh Insole have?,Ho Chi Minh Insole has no late delivery penalty clause.
+G023,document,What late delivery penalty does Bekasi Cushion Co have?,Bekasi Cushion Co charges 1.5% of purchase order value for each full week late.
+G024,document,What late delivery penalty does Ningbo Eyelet Ltd have?,Ningbo Eyelet Ltd has no late delivery penalty clause.
+G025,structured,Which products are below their reorder point in the Memphis warehouse?,"Below reorder point in Memphis: SF-005, SF-006."
+G026,structured,Which products are below their reorder point in the Rotterdam warehouse?,"Below reorder point in Rotterdam: SF-005, SF-006."
+G027,structured,Which products are below their reorder point in the Singapore warehouse?,"Below reorder point in Singapore: SF-005, SF-006."
+G028,structured,Which products are below their reorder point in the Los Angeles warehouse?,"Below reorder point in Los Angeles: SF-005, SF-006."
+G029,structured,Which factories are at risk because of repeated late deliveries?,"Factories with 3 or more late orders: Hanoi Sole Works (F002), Java Lace Mfg (F003), Surabaya Foam Ltd (F004), Pune Upper Mills (F009), Ho Chi Minh Insole (F010), Bekasi Cushion Co (F011)."
+G030,hybrid,"Was purchase order PO-00005 late, and what penalty applies to it?","PO-00005 was 6 days late (0 full weeks) from Surabaya Foam Ltd. Penalty rate 2.0% per week of PO value 31479.30, so the penalty is 0.00."
+G031,hybrid,"Was purchase order PO-00007 late, and what penalty applies to it?","PO-00007 was 4 days late (0 full weeks) from Hanoi Sole Works. Penalty rate 0.0% per week of PO value 50339.00, so the penalty is 0.00."
+G032,hybrid,"Was purchase order PO-00010 late, and what penalty applies to it?","PO-00010 was 5 days late (0 full weeks) from Bekasi Cushion Co. Penalty rate 1.5% per week of PO value 18047.47, so the penalty is 0.00."
+G033,hybrid,"Was purchase order PO-00017 late, and what penalty applies to it?","PO-00017 was 1 days late (0 full weeks) from Bekasi Cushion Co. Penalty rate 1.5% per week of PO value 42600.00, so the penalty is 0.00."
+G034,hybrid,"Was purchase order PO-00018 late, and what penalty applies to it?","PO-00018 was 3 days late (0 full weeks) from Bekasi Cushion Co. Penalty rate 1.5% per week of PO value 4266.27, so the penalty is 0.00."
+G035,hybrid,"Was purchase order PO-00022 late, and what penalty applies to it?","PO-00022 was 9 days late (1 full weeks) from Surabaya Foam Ltd. Penalty rate 2.0% per week of PO value 10582.10, so the penalty is 211.64."
+G036,hybrid,"Was purchase order PO-00025 late, and what penalty applies to it?","PO-00025 was 8 days late (1 full weeks) from Guangzhou Heel Co. Penalty rate 0.0% per week of PO value 47465.40, so the penalty is 0.00."
+G037,hybrid,"Was purchase order PO-00036 late, and what penalty applies to it?","PO-00036 was 9 days late (1 full weeks) from Bekasi Cushion Co. Penalty rate 1.5% per week of PO value 34821.15, so the penalty is 522.32."
+G038,hybrid,"Was purchase order PO-00040 late, and what penalty applies to it?","PO-00040 was 1 days late (0 full weeks) from Surabaya Foam Ltd. Penalty rate 2.0% per week of PO value 47774.31, so the penalty is 0.00."
+G039,hybrid,"Was purchase order PO-00048 late, and what penalty applies to it?","PO-00048 was 5 days late (0 full weeks) from Pune Upper Mills. Penalty rate 0.0% per week of PO value 41470.00, so the penalty is 0.00."

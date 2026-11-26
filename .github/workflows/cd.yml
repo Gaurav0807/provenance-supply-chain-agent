@@ -1,0 +1,61 @@
+name: CD
+
+# Runs only after CI passes on main. Applies infrastructure, then uploads the documents.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  BUCKET: provenance-data-4102a6
+
+jobs:
+  deploy-infra:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production   # a reviewer must approve in GitHub before this runs
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r ../requirements.txt   # the vector index script needs requests and boto3
+      - uses: hashicorp/setup-terraform@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - run: terraform init -input=false
+      - run: terraform apply -auto-approve -input=false
+
+  deploy-data:
+    # Uploading documents triggers S3 -> SNS -> SQS -> ingest Lambda -> knowledge base sync.
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - run: python -m data.generate_docs
+      - run: aws s3 sync data/documents s3://${{ env.BUCKET }}/documents/ --delete
+      - run: python -m data.generate --upload ${{ env.BUCKET }} --profile "" --region ${{ env.AWS_REGION }}
