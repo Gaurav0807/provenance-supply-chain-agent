@@ -70,3 +70,12 @@ def test_other_tables_are_refused():
     for sql in ["SELECT * FROM other_db.secret", "SELECT * FROM information_schema.tables"]:
         with pytest.raises(UnsafeSQL):
             check(sql)
+
+
+def test_citation_needs_a_retrieved_document():
+    from evals.run_evals import cited_document
+
+    trace = [{"tool": "search_documents", "output": {"matches": [{"doc": "contract_F004_surabaya_foam.md"}]}}]
+    assert cited_document("Per contract_F004_surabaya_foam.md, the penalty is 2%.", trace)
+    assert not cited_document("The penalty is 2%.", trace)
+    assert not cited_document("Per contract_F004_surabaya_foam.md.", [])

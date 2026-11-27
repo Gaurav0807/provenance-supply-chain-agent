@@ -15,6 +15,7 @@ from typing import Annotated, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
+from agent import usage
 from agent.agent import (
     LLM_MODEL,
     MAX_STEPS,
@@ -56,6 +57,7 @@ def agent_node(state):
         inferenceConfig={"maxTokens": 1500, "temperature": 0},
         **({"guardrailConfig": GUARDRAIL} if GUARDRAIL else {}),
     )
+    usage.record(resp)
     if resp["stopReason"] == "guardrail_intervened":
         return {"steps": steps, "answer": BLOCKED}
     msg = resp["output"]["message"]

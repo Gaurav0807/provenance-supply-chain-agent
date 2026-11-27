@@ -10,6 +10,7 @@ from deepeval.metrics import GEval
 from deepeval.models import DeepEvalBaseLLM
 from deepeval.test_case import SingleTurnParams
 
+from agent import usage
 from agent.aws import bedrock_client
 
 JUDGE_MODEL_ID = os.environ.get("JUDGE_MODEL_ID", "us.anthropic.claude-haiku-4-5-20251001-v1:0")
@@ -31,6 +32,7 @@ class BedrockJudge(DeepEvalBaseLLM):
             messages=[{"role": "user", "content": [{"text": prompt}]}],
             inferenceConfig={"maxTokens": 1000, "temperature": 0},
         )
+        usage.record(resp)
         return resp["output"]["message"]["content"][0]["text"]
 
     async def a_generate(self, prompt, schema=None):
@@ -41,7 +43,7 @@ class BedrockJudge(DeepEvalBaseLLM):
 
 
 def metrics():
-    """The G-Eval metrics, keyed by a short label used in reports."""
+    """The G-Eval correctness metric. Source citation is checked in code, so it costs no judge call."""
     judge = BedrockJudge()
     return {
         "correctness": GEval(
@@ -50,22 +52,6 @@ def metrics():
                 "Does the actual output state the same facts as the expected output? "
                 "The same names or IDs, the same numbers (within 1% for money), and the same conclusion. "
                 "Missing or wrong facts fail. Extra correct detail is fine. Saying the data does not say fails."
-            ),
-            evaluation_params=[
-                SingleTurnParams.INPUT,
-                SingleTurnParams.ACTUAL_OUTPUT,
-                SingleTurnParams.EXPECTED_OUTPUT,
-            ],
-            model=judge,
-            threshold=0.7,
-            async_mode=False,
-        ),
-        "source_citation": GEval(
-            name="Source citation",
-            criteria=(
-                "If the expected output comes from a contract, delay notice, quality report, stock note "
-                "or SLA, the actual output must name the source document. If the expected output does not "
-                "come from a document, pass."
             ),
             evaluation_params=[
                 SingleTurnParams.INPUT,

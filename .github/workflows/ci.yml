@@ -14,6 +14,24 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
+  changes:
+    # Decides whether this commit can change the agent's answers (and so needs the LLM evals).
+    runs-on: ubuntu-latest
+    outputs:
+      llm: ${{ steps.filter.outputs.llm }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            llm:
+              - 'agent/**'
+              - 'ontology/**'
+              - 'evals/**'
+              - 'data/**'
+              - 'requirements*.txt'
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -33,7 +51,9 @@ jobs:
 
   evals:
     # Scores the agent on the eval suite. Fails below EVAL_BASELINE.
-    needs: test
+    # Skipped (not failed) when the commit changes no agent, ontology, eval or data code.
+    needs: [test, changes]
+    if: needs.changes.outputs.llm == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -69,7 +89,8 @@ jobs:
 
   terraform-plan:
     # Runs only after the evals pass, so infrastructure is planned only for a validated agent.
-    needs: evals
+    needs: [test, evals]
+    if: always() && needs.test.result == 'success' && (needs.evals.result == 'success' || needs.evals.result == 'skipped')
     runs-on: ubuntu-latest
     defaults:
       run:
